@@ -1,6 +1,5 @@
 // Copyright 2019 Luca Istrate, Danut Matei
 #include <vector>
-#include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
