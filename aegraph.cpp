@@ -281,9 +281,69 @@ AEGraph AEGraph::double_cut(std::vector<int> where) const {
 }
 
 
-std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
-    return {};
+
+void AEGraph::possible_erasures_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res) const {
+    // if (g.is_SA)
+    // {
+    //     for (int i = 0; i < g.num_subgraphs() + g.num_atoms(); i++)
+    //     {
+    //         res.push_back({i});
+    //     }
+        
+    // }
+    // else 
+
+
+    
+    if(path.size() % 2 == 1) {
+        // possible double cut
+        res.push_back(path);
+        // RETURNUL SALVATOR return;
+    }
+
+
+    for(int i = 0; i < g.num_subgraphs(); ++i) {
+        path.push_back(i);
+        possible_erasures_helper(g.subgraphs[i], path, res);
+        path.pop_back();
+    }
+
+    for(int i = 0; i < g.num_atoms(); ++i) {
+
+        path.push_back(i + g.num_subgraphs());
+
+        if(path.size() % 2 == 1 && g.num_subgraphs() + g.num_atoms() > 1 && !g.is_SA) {
+            res.push_back(path);
+        } else if(g.is_SA) {
+            res.push_back(path);
+        }
+
+        path.pop_back();
+    }
 }
+
+
+
+
+std::vector<std::vector<int>> AEGraph::possible_erasures(int level = -1) const {
+    std::vector<int> path;
+    std::vector<std::vector<int>> res;
+
+    possible_erasures_helper(*this, path, res);
+    //res = possible_double_cuts();
+    return res;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 AEGraph AEGraph::erase(std::vector<int> where) const {

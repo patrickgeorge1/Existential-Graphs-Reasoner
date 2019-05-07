@@ -29,7 +29,9 @@ class AEGraph {
     std::vector<std::vector<int>> possible_double_cuts() const;
     AEGraph double_cut(std::vector<int> where) const;
 
-    std::vector<std::vector<int>> possible_erasures(int level = -1) const;
+
+    void possible_erasures_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res) const;
+    std::vector<std::vector<int>> possible_erasures(int level) const;
     AEGraph erase(std::vector<int>) const;
 
     std::vector<std::vector<int>> possible_deiterations() const;
