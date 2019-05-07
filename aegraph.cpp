@@ -282,42 +282,23 @@ AEGraph AEGraph::double_cut(std::vector<int> where) const {
 
 
 
-void AEGraph::possible_erasures_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res) const {
-    // if (g.is_SA)
-    // {
-    //     for (int i = 0; i < g.num_subgraphs() + g.num_atoms(); i++)
-    //     {
-    //         res.push_back({i});
-    //     }
-        
-    // }
-    // else 
-
-
-    
-    if(path.size() % 2 == 1) {
-        // possible double cut
+void AEGraph::possible_erasures_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res, int brothers = 0, bool calledFromSA = true) const {
+    if(path.size() % 2 == 1 && (brothers >= 1 || (brothers == 0 && calledFromSA)) ) {
         res.push_back(path);
-        // RETURNUL SALVATOR return;
     }
-
-
     for(int i = 0; i < g.num_subgraphs(); ++i) {
         path.push_back(i);
-        possible_erasures_helper(g.subgraphs[i], path, res);
+        int brothers = g.num_subgraphs() + g.num_atoms() - 1;         // nr de copii dev nr de frati ai unui copil
+        possible_erasures_helper(g.subgraphs[i], path, res, brothers, g.is_SA);
         path.pop_back();
     }
-
     for(int i = 0; i < g.num_atoms(); ++i) {
-
         path.push_back(i + g.num_subgraphs());
-
         if(path.size() % 2 == 1 && g.num_subgraphs() + g.num_atoms() > 1 && !g.is_SA) {
             res.push_back(path);
         } else if(g.is_SA) {
             res.push_back(path);
         }
-
         path.pop_back();
     }
 }
