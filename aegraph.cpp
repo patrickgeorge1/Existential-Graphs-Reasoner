@@ -331,8 +331,54 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
 }
 
 AEGraph AEGraph::erase(std::vector<int> where) const {
-    // 10p
-    return AEGraph("()");
+    AEGraph graphCopy = (*this);
+    // we will use cutPosition to iterate trough the graph
+    AEGraph cutPosition = graphCopy;
+    
+    for(int i = 0; i < where.size(); ++i) {
+        cutPosition = cutPosition[where[i]];
+    }
+
+
+    // we search for the erasure part in our graf
+    std::string toBeFound;
+    if (cutPosition.repr()[0] == '(') toBeFound = cutPosition.repr().substr (1, cutPosition.repr().length() - 2);
+    else toBeFound = cutPosition.repr();
+    std::size_t found = (*this).repr().find(toBeFound);
+
+
+    // we split the graf into one left and one right part excepting erasure part
+    std::string leftCut = (*this).repr().substr (0,found);
+    std::string rightCut;
+    if ((*this).repr()[found + 1] != ',') rightCut = (*this).repr().substr (found + toBeFound.length(), (*this).repr().length() - 1);
+    else rightCut = (*this).repr().substr (found + toBeFound.length() + 1, (*this).repr().length() - 1);
+
+
+    // we fix remaining errors like consecutive two commas 
+    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ' ')
+    {
+        leftCut.pop_back();
+    } else 
+            if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ',')
+            {
+                rightCut.erase(0,2);
+                
+            
+            }
+            else 
+                    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ')')
+                    {
+                        leftCut.pop_back();
+                        leftCut.pop_back();
+                    }
+                    else
+                            if (leftCut[leftCut.size()-1] == '(' && rightCut[0] == ',') {
+                                   rightCut.erase(0,2); 
+                            }   
+
+
+    std::string extracted = leftCut + rightCut;
+    return AEGraph(extracted);
 }
 
 
