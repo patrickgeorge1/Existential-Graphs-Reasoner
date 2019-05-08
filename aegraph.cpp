@@ -276,8 +276,26 @@ void AEGraph::possible_double_cuts_helper(const AEGraph& g, std::vector<int>& pa
 }
 
 AEGraph AEGraph::double_cut(std::vector<int> where) const {
-    // 10p
-    return AEGraph("()");
+    AEGraph graphCopy = (*this);
+
+    // we will use cutPosition to iterate trough the graph
+    AEGraph cutPosition = graphCopy;
+    
+    for(int i = 0; i < where.size(); ++i) {
+        cutPosition = cutPosition[where[i]];
+    }
+
+    // cut the extra parantheses
+    int rightCut = cutPosition.repr().size() - 4;
+    std::string afterCut = cutPosition.repr().substr(2, rightCut);
+
+    // find position of double cut in string
+    auto found = graphCopy.repr().find(cutPosition.repr());
+
+    // do the double cut, generate a new graph and return it
+    std::string newGraph = graphCopy.repr().replace(found, cutPosition.repr().size(), afterCut);
+    
+    return AEGraph(newGraph);
 }
 
 
@@ -303,29 +321,14 @@ void AEGraph::possible_erasures_helper(const AEGraph& g, std::vector<int>& path,
     }
 }
 
-
-
-
-std::vector<std::vector<int>> AEGraph::possible_erasures(int level = -1) const {
+std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
     std::vector<int> path;
     std::vector<std::vector<int>> res;
 
     possible_erasures_helper(*this, path, res);
-    //res = possible_double_cuts();
+
     return res;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 AEGraph AEGraph::erase(std::vector<int> where) const {
     // 10p
