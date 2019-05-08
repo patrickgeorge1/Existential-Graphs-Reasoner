@@ -335,7 +335,7 @@ std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
   std::vector<std::vector<int>> res;
 
   for (int i = 0; i < num_atoms() + num_subgraphs(); ++i) {
-    // check all subgraphs except the one we are currently at
+    // check all subgraphs/atoms except the one we are currently at
     for (int j = 0; j < num_subgraphs(); ++j) {
       if (subgraphs[j] != (*this)[i]) { 
         
