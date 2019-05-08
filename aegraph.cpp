@@ -346,37 +346,26 @@ AEGraph AEGraph::erase(std::vector<int> where) const {
     else toBeFound = cutPosition.repr();
     std::size_t found = (*this).repr().find(toBeFound);
 
-
-    // we split the graf into one left and one right part excepting erasure part
+    // we split the graf into one left and one right part excepting erasured part
     std::string leftCut = (*this).repr().substr (0,found);
     std::string rightCut;
     if ((*this).repr()[found + 1] != ',') rightCut = (*this).repr().substr (found + toBeFound.length(), (*this).repr().length() - 1);
     else rightCut = (*this).repr().substr (found + toBeFound.length() + 1, (*this).repr().length() - 1);
 
-
     // we fix remaining errors like consecutive two commas 
-    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ' ')
-    {
+    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ' ') {
         leftCut.pop_back();
-    } else 
-            if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ',')
-            {
-                rightCut.erase(0,2);
-                
-            
-            }
-            else 
-                    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ')')
-                    {
-                        leftCut.pop_back();
-                        leftCut.pop_back();
-                    }
-                    else
-                            if (leftCut[leftCut.size()-1] == '(' && rightCut[0] == ',') {
-                                   rightCut.erase(0,2); 
-                            }   
-
-
+    } 
+    else if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ',') {
+            rightCut.erase(0,2);
+         }
+         else if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ')') {
+                leftCut.pop_back();
+                leftCut.pop_back();
+              }
+              else if (leftCut[leftCut.size()-1] == '(' && rightCut[0] == ',') {
+                           rightCut.erase(0,2); 
+                   }   
     std::string extracted = leftCut + rightCut;
     return AEGraph(extracted);
 }
