@@ -300,8 +300,7 @@ void AEGraph::possible_erasures_helper(const AEGraph &g, std::vector<int> &path,
     path.push_back(i);
 
     // nr de copii dev nr de frati ai unui copil
-    int brothers = g.num_subgraphs() + g.num_atoms() - 1; 
-    
+    int brothers = g.num_subgraphs() + g.num_atoms() - 1;
     possible_erasures_helper(g.subgraphs[i], path, res, brothers, g.is_SA);
     path.pop_back();
   }
@@ -322,7 +321,7 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
   std::vector<std::vector<int>> res;
   level++;  // remove warning
 
-  if(this->repr() == "()") return res;
+  if (this -> repr() == "()") return res;
 
   possible_erasures_helper(*this, path, res);
 
@@ -339,15 +338,12 @@ std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
   for (int i = 0; i < num_atoms() + num_subgraphs(); ++i) {
     // check all subgraphs/atoms except the one we are currently at
     for (int j = 0; j < num_subgraphs(); ++j) {
-      if (subgraphs[j] != (*this)[i]) { 
-        
+      if (subgraphs[j] != (*this)[i]) {
         // treat subgraph case
         if (i < num_subgraphs() && subgraphs[j].contains((*this)[i])) {
-
           // get all paths to the subgraph
           std::vector<std::vector<int>> paths =
               subgraphs[j].get_paths_to((*this)[i]);
-
           // add all paths to the results
           for (auto auxPath : paths) {
             // recalculate full path
@@ -361,11 +357,9 @@ std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
         // treat atom case
         if (i >= num_subgraphs() && i < num_atoms() + num_subgraphs() &&
             subgraphs[j].contains(atoms[i - num_subgraphs()])) {
-
           // get all paths to the atom
           std::vector<std::vector<int>> paths =
               subgraphs[j].get_paths_to(atoms[i - num_subgraphs()]);
-
           // add all paths to the results
           for (auto auxPath : paths) {
             // recalculate full path
@@ -388,20 +382,24 @@ AEGraph AEGraph::deiterate(std::vector<int> where) const {
   // we will use cutPosition to iterate trough the graph
   AEGraph cutPosition = graphCopy, parent("()");
 
-  int paddingLeft = 0, paddingRight = 0; // padding for deleting
+  int paddingLeft = 0, paddingRight = 0;  // padding for deleting
 
-  for(unsigned int i = 0; i < where.size(); ++i) {
+  for (unsigned int i = 0; i < where.size(); ++i) {
       parent = cutPosition;
       cutPosition = cutPosition[where[i]];
   }
 
   // parse string in case of atom
   std::string toBeFound;
-  if (cutPosition.repr()[0] == '(') toBeFound = cutPosition.repr().substr (1, cutPosition.repr().length() - 2);
-  else toBeFound = cutPosition.repr();
+  if (cutPosition.repr()[0] == '(')
+    toBeFound = cutPosition.repr().substr(1,
+    cutPosition.repr().length() - 2);
+  else
+    toBeFound = cutPosition.repr();
 
   // prepare for splitting the level
-  std::string representation = parent.repr().substr(1, parent.repr().size() - 2);
+  std::string representation = parent.repr().substr(1,
+  parent.repr().size() - 2);
 
   // split the graph into separate elements
   auto elements = split_level(representation);
@@ -409,27 +407,29 @@ AEGraph AEGraph::deiterate(std::vector<int> where) const {
   // found will keep the position in the string where deiterate will occur
   int found = 1;
 
-  for(unsigned int i = 0; i < elements.size() && i < (unsigned int) where[where.size() - 1]; ++i) {
+  for (unsigned int i = 0; i < elements.size() &&
+  i < (unsigned int) where[where.size() - 1]; ++i) {
     found+=elements[i].length();
-    found+=2; // add separators -> ", "
+    found+=2;  // add separators -> ", "
   }
 
   // left padding case
-  if(parent.repr()[found-1] == ' ') {
+  if (parent.repr()[found-1] == ' ') {
     paddingLeft = 1;
   }
 
   // right padding case
-  if(parent.repr()[found+toBeFound.length()] == ',') {
+  if (parent.repr()[found+toBeFound.length()] == ',') {
     paddingRight = 2;
   }
 
   // generate the new parent
-  std::string newParent = parent.repr().replace(found-paddingLeft, paddingLeft+toBeFound.length()+paddingRight,"");
-  
+  std::string newParent = parent.repr().replace(found-paddingLeft,
+  paddingLeft+toBeFound.length()+paddingRight, "");
   // change the parent in the graph with the new one, and return the result
   auto foundParent = graphCopy.repr().find(parent.repr());
-  std::string newGraph = graphCopy.repr().replace(foundParent, parent.repr().length(), newParent);
+  std::string newGraph = graphCopy.repr().replace(foundParent,
+  parent.repr().length(), newParent);
 
   return AEGraph(newGraph);
 }

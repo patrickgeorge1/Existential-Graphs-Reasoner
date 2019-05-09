@@ -25,12 +25,16 @@ class AEGraph {
     int num_atoms() const;
     int size() const;
 
-    void possible_double_cuts_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res) const;
+    void possible_double_cuts_helper(const AEGraph& g,
+    std::vector<int>& path,
+    std::vector<std::vector<int>>& res) const;
     std::vector<std::vector<int>> possible_double_cuts() const;
     AEGraph double_cut(std::vector<int> where) const;
 
 
-    void possible_erasures_helper(const AEGraph& g, std::vector<int>& path, std::vector<std::vector<int>>& res, int brothers, bool calledFromSA) const;
+    void possible_erasures_helper(const AEGraph& g,
+    std::vector<int>& path, std::vector<std::vector<int>>& res,
+    int brothers, bool calledFromSA) const;
     std::vector<std::vector<int>> possible_erasures(int level = -1) const;
     AEGraph erase(std::vector<int>) const;
 
