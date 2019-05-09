@@ -320,6 +320,7 @@ void AEGraph::possible_erasures_helper(const AEGraph &g, std::vector<int> &path,
 std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
   std::vector<int> path;
   std::vector<std::vector<int>> res;
+  level++;  // remove warning
 
   if(this->repr() == "()") return res;
 
@@ -329,44 +330,7 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
 }
 
 AEGraph AEGraph::erase(std::vector<int> where) const {
-    AEGraph graphCopy = (*this);
-    // we will use cutPosition to iterate trough the graph
-    AEGraph cutPosition = graphCopy, parent("()");
-    
-    for(int i = 0; i < where.size(); ++i) {
-        parent = cutPosition;
-        cutPosition = cutPosition[where[i]];
-    }
-
-    // we search for the erasure part in our graf
-    std::string toBeFound;
-    if (cutPosition.repr()[0] == '(') toBeFound = cutPosition.repr().substr (1, cutPosition.repr().length() - 2);
-    else toBeFound = cutPosition.repr();
-    std::size_t found = (*this).repr().find(toBeFound);
-
-    // we split the graf into one left and one right part excepting erasured part
-    std::string leftCut = (*this).repr().substr (0,found);
-    std::string rightCut;
-    if ((*this).repr()[found + 1] != ',') rightCut = (*this).repr().substr (found + toBeFound.length(), (*this).repr().length() - 1);
-    else rightCut = (*this).repr().substr (found + toBeFound.length() + 1, (*this).repr().length() - 1);
-
-    // we fix remaining errors like consecutive two commas 
-    if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ' ') {
-        leftCut.pop_back();
-    } 
-    else if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ',') {
-            rightCut.erase(0,2);
-         }
-         else if (leftCut[leftCut.size()-1] == ' ' && rightCut[0] == ')') {
-                leftCut.pop_back();
-                leftCut.pop_back();
-              }
-              else if (leftCut[leftCut.size()-1] == '(' && rightCut[0] == ',') {
-                           rightCut.erase(0,2); 
-                   }   
-    std::string extracted = leftCut + rightCut;
-    return AEGraph(extracted);
-    //return this->deiterate(where);
+    return this->deiterate(where);
 }
 
 std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
@@ -419,33 +383,51 @@ std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
 }
 
 AEGraph AEGraph::deiterate(std::vector<int> where) const {
-
   AEGraph graphCopy = (*this);
+
   // we will use cutPosition to iterate trough the graph
   AEGraph cutPosition = graphCopy, parent("()");
-  int paddingLeft = 0, paddingRight = 0;
 
-  for(int i = 0; i < where.size(); ++i) {
+  int paddingLeft = 0, paddingRight = 0; // padding for deleting
+
+  for(unsigned int i = 0; i < where.size(); ++i) {
       parent = cutPosition;
       cutPosition = cutPosition[where[i]];
   }
 
+  // parse string in case of atom
   std::string toBeFound;
   if (cutPosition.repr()[0] == '(') toBeFound = cutPosition.repr().substr (1, cutPosition.repr().length() - 2);
   else toBeFound = cutPosition.repr();
-  
-  auto found = parent.repr().find(toBeFound);  
 
+  // prepare for splitting the level
+  std::string representation = parent.repr().substr(1, parent.repr().size() - 2);
+
+  // split the graph into separate elements
+  auto elements = split_level(representation);
+
+  // found will keep the position in the string where deiterate will occur
+  int found = 1;
+
+  for(unsigned int i = 0; i < elements.size() && i < (unsigned int) where[where.size() - 1]; ++i) {
+    found+=elements[i].length();
+    found+=2; // add separators -> ", "
+  }
+
+  // left padding case
   if(parent.repr()[found-1] == ' ') {
     paddingLeft = 1;
   }
 
+  // right padding case
   if(parent.repr()[found+toBeFound.length()] == ',') {
     paddingRight = 2;
   }
 
+  // generate the new parent
   std::string newParent = parent.repr().replace(found-paddingLeft, paddingLeft+toBeFound.length()+paddingRight,"");
   
+  // change the parent in the graph with the new one, and return the result
   auto foundParent = graphCopy.repr().find(parent.repr());
   std::string newGraph = graphCopy.repr().replace(foundParent, parent.repr().length(), newParent);
 
