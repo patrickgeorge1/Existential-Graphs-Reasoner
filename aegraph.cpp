@@ -321,6 +321,8 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
   std::vector<int> path;
   std::vector<std::vector<int>> res;
 
+  if(this->repr() == "()") return res;
+
   possible_erasures_helper(*this, path, res);
 
   return res;
@@ -329,12 +331,12 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
 AEGraph AEGraph::erase(std::vector<int> where) const {
     AEGraph graphCopy = (*this);
     // we will use cutPosition to iterate trough the graph
-    AEGraph cutPosition = graphCopy;
+    AEGraph cutPosition = graphCopy, parent("()");
     
     for(int i = 0; i < where.size(); ++i) {
+        parent = cutPosition;
         cutPosition = cutPosition[where[i]];
     }
-
 
     // we search for the erasure part in our graf
     std::string toBeFound;
@@ -364,6 +366,7 @@ AEGraph AEGraph::erase(std::vector<int> where) const {
                    }   
     std::string extracted = leftCut + rightCut;
     return AEGraph(extracted);
+    //return this->deiterate(where);
 }
 
 std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
@@ -416,6 +419,35 @@ std::vector<std::vector<int>> AEGraph::possible_deiterations() const {
 }
 
 AEGraph AEGraph::deiterate(std::vector<int> where) const {
-  // 10p
-  return AEGraph("()");
+
+  AEGraph graphCopy = (*this);
+  // we will use cutPosition to iterate trough the graph
+  AEGraph cutPosition = graphCopy, parent("()");
+  int paddingLeft = 0, paddingRight = 0;
+
+  for(int i = 0; i < where.size(); ++i) {
+      parent = cutPosition;
+      cutPosition = cutPosition[where[i]];
+  }
+
+  std::string toBeFound;
+  if (cutPosition.repr()[0] == '(') toBeFound = cutPosition.repr().substr (1, cutPosition.repr().length() - 2);
+  else toBeFound = cutPosition.repr();
+  
+  auto found = parent.repr().find(toBeFound);  
+
+  if(parent.repr()[found-1] == ' ') {
+    paddingLeft = 1;
+  }
+
+  if(parent.repr()[found+toBeFound.length()] == ',') {
+    paddingRight = 2;
+  }
+
+  std::string newParent = parent.repr().replace(found-paddingLeft, paddingLeft+toBeFound.length()+paddingRight,"");
+  
+  auto foundParent = graphCopy.repr().find(parent.repr());
+  std::string newGraph = graphCopy.repr().replace(foundParent, parent.repr().length(), newParent);
+
+  return AEGraph(newGraph);
 }
