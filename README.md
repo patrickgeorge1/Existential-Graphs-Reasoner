@@ -5,6 +5,9 @@
 ### Grupa: 312CA
 ### Start date: 05:05:2019
 ### End date: 09:05:2019
+
+  WARNING : Fisierul .h a fost modificat. Don't overwrite it pls :)
+
 ## Encountered Problems :
 * had to use recursion to solve some tasks
 * deiterate() and erase() don't take in account the level of the deleted node, so task 7 fails, the position where the graph string needs change should be calculated with split_level() or some similar mechanic that iterates through the subgraphs and atoms.
