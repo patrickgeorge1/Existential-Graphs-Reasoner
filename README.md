@@ -1,3 +1,7 @@
+<!-- 
+  Authors: Mihai Pirvulet & Vitoga George Patrick
+  Repo link : https://github.com/patrickgeorge1/Existential-Graphs-Reasoner
+-->
 # Existential Graphs Reasoner
 
 
