@@ -112,6 +112,7 @@ AEGraph::AEGraph(std::string representation) {
 
   // split the graph into separate elements
   auto v = split_level(representation);
+
   // add them to the corresponding vector
   for (auto s : v) {
     if (s[0] != '[') {
@@ -249,15 +250,12 @@ void AEGraph::possible_double_cuts_helper(
     const AEGraph &g, std::vector<int> &path,
     std::vector<std::vector<int>> &res) const {
   if (g.num_atoms() == 0 && !g.is_SA) {
-    // possible double cut
+    // possible double cut, push to results vector
     res.push_back(path);
   }
 
-  if (g.num_subgraphs() == 0) {
-    return;
-  }
-
   for (int i = 0; i < g.num_subgraphs(); ++i) {
+    // recursive call and add node to path
     path.push_back(i);
     possible_double_cuts_helper(g.subgraphs[i], path, res);
     path.pop_back();
@@ -274,16 +272,19 @@ AEGraph AEGraph::double_cut(std::vector<int> where) const {
     cutPosition = cutPosition[where[i]];
   }
 
+  std::string toBeCut = cutPosition.repr();
+  std::string graphString = graphCopy.repr();
+
   // cut the extra parantheses
-  int rightCut = cutPosition.repr().size() - 4;
-  std::string afterCut = cutPosition.repr().substr(2, rightCut);
+  int rightCut = toBeCut.size() - 4;
+  std::string afterCut = toBeCut.substr(2, rightCut);
 
   // find position of double cut in string
-  auto found = graphCopy.repr().find(cutPosition.repr());
+  auto found = graphString.find(toBeCut);
 
   // do the double cut, generate a new graph and return it
   std::string newGraph =
-      graphCopy.repr().replace(found, cutPosition.repr().size(), afterCut);
+      graphString.replace(found, toBeCut.size(), afterCut);
 
   return AEGraph(newGraph);
 }
@@ -292,26 +293,34 @@ void AEGraph::possible_erasures_helper(const AEGraph &g, std::vector<int> &path,
                                        std::vector<std::vector<int>> &res,
                                        int brothers = 0,
                                        bool calledFromSA = true) const {
+  // check if level is even and the erase is valid
   if (path.size() % 2 == 1 &&
       (brothers >= 1 || (brothers == 0 && calledFromSA))) {
     res.push_back(path);
   }
+
+  // treat subgraphs case
   for (int i = 0; i < g.num_subgraphs(); ++i) {
     path.push_back(i);
 
-    // nr de copii dev nr de frati ai unui copil
+    // calculate brothers for the next recursive call
     int brothers = g.num_subgraphs() + g.num_atoms() - 1;
+
     possible_erasures_helper(g.subgraphs[i], path, res, brothers, g.is_SA);
     path.pop_back();
   }
+
+  // treat atoms case
   for (int i = 0; i < g.num_atoms(); ++i) {
     path.push_back(i + g.num_subgraphs());
-    if (path.size() % 2 == 1 && g.num_subgraphs() + g.num_atoms() > 1 &&
-        !g.is_SA) {
-      res.push_back(path);
-    } else if (g.is_SA) {
+
+    // if node is sheet of assertion (case where everything can be deleted)
+    // OR level is even and there is a valid erase
+    if ((path.size() % 2 == 1 && g.num_subgraphs() + g.num_atoms() > 1 &&
+        !g.is_SA) || g.is_SA) {
       res.push_back(path);
     }
+
     path.pop_back();
   }
 }
@@ -321,7 +330,7 @@ std::vector<std::vector<int>> AEGraph::possible_erasures(int level) const {
   std::vector<std::vector<int>> res;
   level++;  // remove warning
 
-  if (this -> repr() == "()") return res;
+  if (this -> repr() == "()") return res;  // treat empty graph edge case
 
   possible_erasures_helper(*this, path, res);
 
@@ -426,6 +435,7 @@ AEGraph AEGraph::deiterate(std::vector<int> where) const {
   // generate the new parent
   std::string newParent = parent.repr().replace(found-paddingLeft,
   paddingLeft+toBeFound.length()+paddingRight, "");
+
   // change the parent in the graph with the new one, and return the result
   auto foundParent = graphCopy.repr().find(parent.repr());
   std::string newGraph = graphCopy.repr().replace(foundParent,
