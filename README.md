@@ -46,6 +46,8 @@
   * possible_double_cuts()
   * double_cut()
   * possible_deiterations()
+  * deiterate()
+  * full proof
 
   
   
